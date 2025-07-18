@@ -1,0 +1,356 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShareLite - Lightweight Social Sharing Plugin 🚀</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        .hero-bg {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+        }
+        .feature-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+        }
+        .pricing-card, .guarantee-card {
+            background: linear-gradient(135deg, #ffffff 0%, #f3f4f6 100%);
+        }
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        .comparison-table th, .comparison-table td {
+            padding: 16px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .comparison-table th {
+            background: rgba(0, 0, 0, 0.05);
+            font-weight: bold;
+            color: #1f2937;
+        }
+        .highlight {
+            background: rgba(34, 197, 94, 0.2);
+            color: #15803d;
+            font-weight: bold;
+            border: 2px solid #22c55e;
+        }
+        .comparison-table tr:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        .comparison-table .check {
+            color: #22c55e;
+            font-size: 1.2rem;
+        }
+        .comparison-table .cross {
+            color: #ef4444;
+            font-size: 1.2rem;
+        }
+    </style>
+</head>
+<body class="font-sans antialiased bg-gray-50">
+    <!-- Hero Section -->
+    <section class="hero-bg text-white py-20">
+        <div class="container mx-auto px-6 text-center">
+            <h1 class="text-5xl font-bold mb-4">ShareLite 🚀</h1>
+            <p class="text-xl mb-6">Lightweight Social Sharing Plugin to Boost Your Content Reach! 🌟</p>
+            <p class="text-lg mb-8">Get started with our Bronze plan for only <strong>$49/year</strong> or go unlimited with Business for <strong>$199/year</strong>! 🎉</p>
+            <button id="purchase-hero" class="bg-yellow-400 text-gray-900 font-semibold py-3 px-6 rounded-lg cursor-pointer hover:bg-yellow-500 transition duration-300">Buy Now</button>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="py-16 bg-gray-100">
+        <div class="container mx-auto px-6">
+            <h2 class="text-4xl font-bold text-center mb-12">Powerful Sharing Features 📱</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="feature-card bg-white p-6 rounded-lg shadow-md">
+                    <h3 class="text-xl font-semibold mb-2">Inline & Floating Buttons 📌</h3>
+                    <p>Place share buttons inline with content or as a floating bar for maximum visibility and engagement.</p>
+                </div>
+                <div class="feature-card bg-white p-6 rounded-lg shadow-md">
+                    <h3 class="text-xl font-semibold mb-2">Extensive Network Support 🌐</h3>
+                    <p>Share to X, Facebook, LinkedIn, WhatsApp, Telegram, Reddit, and many more platforms.</p>
+                </div>
+                <div class="feature-card bg-white p-6 rounded-lg shadow-md">
+                    <h3 class="text-xl font-semibold mb-2">Native Share API 📲</h3>
+                    <p>Optional Native Share API for a seamless, native-like sharing experience on mobile devices.</p>
+                </div>
+                <div class="feature-card bg-white p-6 rounded-lg shadow-md">
+                    <h3 class="text-xl font-semibold mb-2">SVG Icons 🎨</h3>
+                    <p>Crisp, scalable SVG icons for all devices, no blurry icon fonts or images.</p>
+                </div>
+                <div class="feature-card bg-white p-6 rounded-lg shadow-md">
+                    <h3 class="text-xl font-semibold mb-2">No Tracking, GDPR Safe 🔒</h3>
+                    <p>Zero tracking scripts or cookies, fully compliant with GDPR and privacy regulations.</p>
+                </div>
+                <div class="feature-card bg-white p-6 rounded-lg shadow-md">
+                    <h3 class="text-xl font-semibold mb-2">Customizable Styles 🎨</h3>
+                    <p>Control button size, shape, and colors directly from the settings panel.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Premium Features Section -->
+    <section class="py-16">
+        <div class="container mx-auto px-6">
+            <h2 class="text-4xl font-bold text-center mb-12">Premium Features to Supercharge Sharing 🚀</h2>
+            <div class="space-y-6">
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h3 class="text-xl font-semibold mb-2">Additional Social Platforms 🌍</h3>
+                    <p>Unlock access to even more social media networks for broader content reach.</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h3 class="text-xl font-semibold mb-2">Share Click Analytics 📊</h3>
+                    <p>Track how often users click “Share on WhatsApp”, “Share on X”, etc., and identify the most popular buttons. All data is local and private.</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h3 class="text-xl font-semibold mb-2">UTM Tags 🔗</h3>
+                    <p>Add UTM parameters to shared URLs to track external traffic in Google Analytics or other tools, showing where visitors come from and how they reach your site.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Comparison Table Section -->
+    <section class="py-16">
+        <div class="container mx-auto px-6">
+            <h2 class="text-4xl font-bold text-center mb-12">ShareLite: The Ultimate Sharing Solution 🌟</h2>
+            <p class="text-lg text-center mb-8">Compare ShareLite with other social sharing plugins and see why it’s the lightweight, privacy-first choice! 🚀</p>
+            <div class="overflow-x-auto">
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>Feature</th>
+                            <th class="highlight">ShareLite</th>
+                            <th>ShareThis</th>
+                            <th>Shareaholic</th>
+                            <th>AddToAny</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Inline & Floating Buttons</td>
+                            <td class="highlight">✅ Inline and floating options for flexible placement.</td>
+                            <td>✅ Inline and floating buttons available.</td>
+                            <td>✅ Inline and floating with customization.</td>
+                            <td>✅ Inline and floating, highly customizable.</td>
+                        </tr>
+                        <tr>
+                            <td>Social Networks</td>
+                            <td class="highlight">✅ X, Facebook, LinkedIn, WhatsApp, Telegram, Reddit, and more.</td>
+                            <td>✅ Wide range including Facebook, X, Pinterest.</td>
+                            <td>✅ 94+ integrations including WhatsApp, Snapchat.</td>
+                            <td>✅ Extensive list with 100+ platforms.</td>
+                        </tr>
+                        <tr>
+                            <td>Native Share API</td>
+                            <td class="highlight">✅ Optional for seamless mobile sharing.</td>
+                            <td>❌ Not explicitly supported.</td>
+                            <td>❌ No native share API.</td>
+                            <td>✅ Supports native sharing options.</td>
+                        </tr>
+                        <tr>
+                            <td>Icon Quality</td>
+                            <td class="highlight">✅ SVG icons for crisp display on all devices.</td>
+                            <td>✅ Vector icons, high quality.</td>
+                            <td>✅ High-quality icons, customizable.</td>
+                            <td>✅ Vector icons, fully customizable.</td>
+                        </tr>
+                        <tr>
+                            <td>Privacy & Tracking</td>
+                            <td class="highlight">✅ No tracking scripts or cookies, GDPR compliant.</td>
+                            <td>❌ Includes tracking for analytics.</td>
+                            <td>❌ Optional tracking for analytics.</td>
+                            <td>✅ Optional no-tracking mode.</td>
+                        </tr>
+                        <tr>
+                            <td>Customization</td>
+                            <td class="highlight">✅ Button size, shape, and colors fully customizable.</td>
+                            <td>✅ Limited customization via dashboard.</td>
+                            <td>✅ Extensive style and placement options.</td>
+                            <td>✅ Highly customizable with code-level control.</td>
+                        </tr>
+                        <tr>
+                            <td>Analytics</td>
+                            <td class="highlight">✅ Local, private share click analytics (Premium).</td>
+                            <td>✅ Detailed analytics with tracking.</td>
+                            <td>✅ Analytics with Google Analytics integration.</td>
+                            <td>✅ Basic analytics, external tracking required.</td>
+                        </tr>
+                        <tr>
+                            <td>UTM Tracking</td>
+                            <td class="highlight">✅ UTM tags for external traffic tracking (Premium).</td>
+                            <td>❌ No built-in UTM support.</td>
+                            <td>✅ Supports UTM parameters.</td>
+                            <td>✅ UTM support with customization.</td>
+                        </tr>
+                        <tr>
+                            <td>Pricing</td>
+                            <td class="highlight">✅ $49-$199/year, tiered plans for 1-25 websites.</td>
+                            <td>✅ Free with premium upgrades.</td>
+                            <td>✅ Free with premium features ($8/month+).</td>
+                            <td>✅ Free with optional Pro plan ($10/month).</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- Money Back Guarantee Section -->
+    <section class="py-16 bg-gradient-to-r from-blue-50 to-green-50">
+        <div class="container mx-auto px-6 text-center">
+            <h2 class="text-4xl font-bold mb-12 text-gray-800">100% Money Back Guarantee 🛡️</h2>
+            <div class="max-w-2xl mx-auto bg-white bg-opacity-20 backdrop-blur-lg p-8 rounded-xl border border-gray-200">
+                <p class="text-lg text-gray-800 mb-4">You are fully protected by our 100% Money Back Guarantee. If during the next 14 days you experience an issue that makes the plugin unusable and we are unable to resolve it, we'll happily consider offering a full refund of your money. 💰</p>
+                <div class="text-sm text-green-600 font-semibold">Shop with Confidence! Your Satisfaction is Guaranteed! 🎉</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section class="py-16 bg-gray-100">
+        <div class="container mx-auto px-6 text-center">
+            <h2 class="text-4xl font-bold mb-12">Choose Your ShareLite Plan 🎉</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="pricing-card p-8 rounded-lg shadow-lg">
+                    <h3 class="text-2xl font-semibold mb-4">Bronze</h3>
+                    <p class="text-4xl font-bold mb-4">$49<span class="text-lg">/year</span></p>
+                    <p class="text-lg mb-6">Perfect for a single website with all core features.</p>
+                    <button class="bg-yellow-400 text-gray-900 font-semibold py-3 px-6 rounded-lg cursor-pointer hover:bg-yellow-500 transition duration-300" data-plan="bronze">Buy Now</button>
+                </div>
+                <div class="pricing-card p-8 rounded-lg shadow-lg">
+                    <h3 class="text-2xl font-semibold mb-4">Pro</h3>
+                    <p class="text-4xl font-bold mb-4">$99<span class="text-lg">/year</span></p>
+                    <p class="text-lg mb-6">Ideal for professionals managing up to 3 websites.</p>
+                    <button class="bg-yellow-400 text-gray-900 font-semibold py-3 px-6 rounded-lg cursor-pointer hover:bg-yellow-500 transition duration-300" data-plan="pro">Buy Now</button>
+                </div>
+                <div class="pricing-card p-8 rounded-lg shadow-lg">
+                    <h3 class="text-2xl font-semibold mb-4">Business</h3>
+                    <p class="text-4xl font-bold mb-4">$199<span class="text-lg">/year</span></p>
+                    <p class="text-lg mb-6">Best for agencies with up to 25 websites.</p>
+                    <button class="bg-yellow-400 text-gray-900 font-semibold py-3 px-6 rounded-lg cursor-pointer hover:bg-yellow-500 transition duration-300" data-plan="business">Buy Now</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-8">
+        <div class="container mx-auto px-6 text-center">
+            <p class="mb-4">ShareLite - Boost Your Social Reach with Lightweight Sharing! 🔒</p>
+            <p class="text-sm">⚠️ Always ensure your WordPress site is backed up before installing plugins.</p>
+        </div>
+    </footer>
+
+    <!-- Freemius Checkout Script -->
+    <script type="text/javascript" src="https://checkout.freemius.com/js/v1/"></script>
+    <script type="text/javascript">
+        const handler = new FS.Checkout({
+            product_id: '19663',
+            public_key: 'pk_300bc87ce58f2a6831a92d59b1768',
+            image: 'https://ShareLite-plugin.com/logo-100x100.png'
+        });
+
+        // Plan IDs for different tiers
+        const planIds = {
+            bronze: '32587',
+            pro: '32588',
+            business: '32589'
+        };
+
+        // Attach event listener to Hero section Buy Now button (defaults to Bronze)
+        document.getElementById('purchase-hero').addEventListener('click', (e) => {
+            e.preventDefault();
+            handler.open({
+                name: 'ShareLite',
+                plan_id: planIds.bronze,
+                licenses: 1,
+                purchaseCompleted: (response) => {
+                    console.log('Purchase completed:', response);
+                    console.log('User email:', response.user.email);
+                    console.log('License key:', response.license.key);
+                },
+                success: (response) => {
+                    console.log('Checkout closed after successful purchase:', response);
+                    console.log('User email:', response.user.email);
+                    console.log('License key:', response.license.key);
+                }
+            });
+        });
+
+        // Attach event listeners to Pricing section Buy Now buttons
+        document.querySelectorAll('.pricing-card button').forEach(button => {
+            button.addEventListener('click', (e) => {
+                e.preventDefault();
+                const plan = button.getAttribute('data-plan');
+                handler.open({
+                    name: 'ShareLite',
+                    plan_id: planIds[plan],
+                    licenses: plan === 'bronze' ? 1 : plan === 'pro' ? 3 : 25,
+                    purchaseCompleted: (response) => {
+                        console.log('Purchase completed:', response);
+                        console.log('User email:', response.user.email);
+                        console.log('License key:', response.license.key);
+                    },
+                    success: (response) => {
+                        console.log('Checkout closed after successful purchase:', response);
+                        console.log('User email:', response.user.email);
+                        console.log('License key:', response.license.key);
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
